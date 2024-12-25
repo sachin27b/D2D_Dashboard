@@ -1,0 +1,12 @@
+numpy
+ipykernel
+pandas
+seaborn
+matplotlib
+mlflow
+pyspark
+dash
+xgboost
+scikit-learn
+python-dotenv
+dash_daq

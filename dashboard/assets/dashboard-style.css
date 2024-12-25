@@ -1,0 +1,99 @@
+
+/* new */
+
+body {
+    background-color: #0f0f1a;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+/* Sidebar Styling */
+#sidebar {
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 240px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* Sidebar Glow Effect */
+#sidebar:hover {
+    box-shadow: 4px 0 20px rgba(102, 126, 234, 0.8);
+}
+
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 25px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    transform: rotate(90deg); /* Button rotation on hover */
+    color: #ffffff;
+
+}
+
+/* Sidebar Link Styling */
+.sidebar-link {
+    transition: all 0.3s ease;
+    display: block; /* Ensure it spans the full clickable width */
+    margin: 10px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Sidebar Link Hover */
+.sidebar-link:hover {
+    transform: scale(1.05); /* Smooth scaling */
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+}
+
+/* Sidebar Link Glowing Effect */
+.sidebar-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.5s ease;
+}
+
+.sidebar-link:hover::before {
+    left: 100%;
+}
+
+/* Heading Glow Effect */
+h2 {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transition: text-shadow 0.3s ease;
+}
+
+h2:hover {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1.0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        position: static;
+    }
+    #sidebar-content {
+        text-align: center;
+    }
+}
+

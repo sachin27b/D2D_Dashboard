@@ -1,0 +1,19 @@
+artifact_path: XGBClassifier
+databricks_runtime: '16.0'
+flavors:
+  python_function:
+    data: sparkml
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.spark
+    python_version: 3.12.3
+  spark:
+    code: null
+    model_class: pyspark.ml.pipeline.PipelineModel
+    model_data: sparkml
+    pyspark_version: 3.5.2
+mlflow_version: 2.15.1
+model_uuid: 5b6ab2a7ba014dae9c59f55467377875
+run_id: 55ee2b013ad1458597e489d21d7d17f1
+utc_time_created: '2024-12-19 07:59:42.537500'
