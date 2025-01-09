@@ -1,0 +1,5 @@
+Critical Sigma Level ->,4 sigma,3 sigma,2 sigma,1 sigma,3.9 sigma,0 sigma
+Total slipped STD a/c in one year %,89.24,89.24,89.24,89.24,89.24,89.24
+% successfully identified NPA's to the total slipped a/c,0.0,97.48,98.88,99.43,89.7,99.69
+% sample used for prediction to the total used sample,0.0,88.95,91.21,92.71,80.65,94.04
+Successfully classified accounts (both STD & NPA),100.0,98.04,97.04,96.03,99.4,94.92

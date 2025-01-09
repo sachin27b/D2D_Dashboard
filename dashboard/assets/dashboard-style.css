@@ -40,7 +40,7 @@ body {
 .sidebar-toggle-btn:hover {
     transform: rotate(90deg); /* Button rotation on hover */
     color: #ffffff;
-
+    background: none;
 }
 
 /* Sidebar Link Styling */

@@ -19,7 +19,10 @@ from dotenv import load_dotenv
 import os
 import json
 import dash_daq as daq
-
+import seaborn as sns
+import matplotlib.pyplot as plt
+import io
+import base64
 
 load_dotenv(dotenv_path='../config/.env')
 os.environ["DATABRICKS_HOST"] = os.getenv("DATABRICKS_HOST")
@@ -44,6 +47,7 @@ pd_dropdown_options = [
     {'label': 'Gradient Boosted Tree', 'value': 'gbt_classifier'}
 ]
 lgd_dropdown_options = [
+    {'label': 'XGB Regressor', 'value': 'xgb_regressor'},
     {'label': 'Decision tree', 'value': 'decision_tree_regressor'},
     {'label': 'Gradient Boosted tree', 'value': 'gradient_boosted_tree_regressor'},
     {'label': 'Random Forest', 'value': 'random_forest_regressor'},
@@ -123,7 +127,7 @@ tab_selected_style = {
 pd_model_list = ['xgboost','dt_classifier','logistic_regression','gbt_classifier']
 model_color = ['red', 'blue', 'green', 'black']
 
-lgd_model_list = ['decision_tree_regressor','gradient_boosted_tree_regressor','random_forest_regressor','linear_regression']
+lgd_model_list = ['xgb_regressor','decision_tree_regressor','gradient_boosted_tree_regressor','random_forest_regressor','linear_regression']
 
 def plot_guage(model_accuracy):
 
@@ -195,11 +199,11 @@ def plot_radar(model_metrics):
     return fig
 
 def plot_lgd_radar(model_metrics):
-    metrics = ['RMSE', 'R', 'Adjusted R']
+    metrics = ['RMSE', 'R Square', 'MAE']
     values = [
         round(model_metrics['rmse'], 3),
         round(model_metrics['r2'], 3),
-        round(model_metrics['adjusted_r2'], 3),
+        round(model_metrics['mae'], 3),
     ]
 
     values += [values[0]]
@@ -221,11 +225,11 @@ def plot_lgd_radar(model_metrics):
                 range=[0, 1]
             )
         ),
-        # title="Radar Plot of Model Metrics",
-        showlegend=True
+        showlegend=False
     )
 
     return fig
+
 
 def plot_confusion_matrix(path):
 
@@ -413,25 +417,25 @@ def plot_lgd_parallel(lgd_model_list,model_color):
     metrics_data = {}
     model = []
     rmse = []
-    amse = []
+    mse = []
     r2 = []
-    adjusted_r2 = []
+    mae = []
 
     for name in lgd_model_list:
         helper_obj1 = helper.Helper(name)
         model_metrics = helper_obj1.get_metrics()
         model.append(helper_obj1.get_run().data.tags['mlflow.runName'])
         rmse.append(model_metrics['rmse'])
-        amse.append(model_metrics['amse'])
+        mse.append(model_metrics['mse'])
         r2.append(model_metrics['r2'])
-        adjusted_r2.append(model_metrics['adjusted_r2'])
+        mae.append(model_metrics['mae'])
         
     metrics_data = {
         'Model': model,
         'RMSE': rmse,
-        'AMSE': amse,
+        'MSE': mse,
         'R2': r2,
-        'Adjusted_R2': adjusted_r2,
+        'MAE': mae,
     }
     df = pd.DataFrame(metrics_data)
 
@@ -439,13 +443,13 @@ def plot_lgd_parallel(lgd_model_list,model_color):
     df['Model_Num'] = df['Model'].astype('category').cat.codes
     fig = px.parallel_coordinates(
         df,
-        dimensions=["RMSE", "AMSE", "R2", "Adjusted_R2"], 
+        dimensions=["RMSE", "MSE", "R2", "MAE"], 
         color="Model_Num",
         labels={
             "RMSE": "RMSE",
-            "AMSE": "AMSE",
+            "MSE": "MSE",
             "R2": "R2",
-            "Adjusted_R2": "Adjusted R2",
+            "MAE": "MAE",
             "Model_Num": "Model"
         },
         color_continuous_scale=model_color  
@@ -454,6 +458,48 @@ def plot_lgd_parallel(lgd_model_list,model_color):
     return fig
 
 
+import json
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+def plot_actual_vs_predicted(data_path, output_path):
+    # Load data from the JSON file
+    with open(data_path, 'rb') as file:
+        data = json.load(file)
+    
+    # Create a scatter plot using Seaborn
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(
+        x=data["actual"], 
+        y=data["predicted"], 
+        color='blue', 
+        s=80, 
+        label='Data Points'
+    )
+    
+    # Add the diagonal line (perfect prediction line)
+    min_val = min(min(data["actual"]), min(data["predicted"]))
+    max_val = max(max(data["actual"]), max(data["predicted"]))
+    plt.plot(
+        [min_val, max_val], 
+        [min_val, max_val], 
+        color='green', 
+        linestyle='--', 
+        label='Perfect Prediction'
+    )
+    
+    # Add titles and labels
+    plt.title("Actual vs Predicted", fontsize=16)
+    plt.xlabel("Actual Values", fontsize=14)
+    plt.ylabel("Predicted Values", fontsize=14)
+    plt.legend(title="Legend", fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    # Save the plot as a PNG file
+    plt.savefig(output_path, bbox_inches='tight')
+    # plt.close()
+    
+    return output_path
 
 
 theme = {
@@ -502,9 +548,11 @@ layout = html.Div(
                     'color': 'black',
                 }
             ),
-            html.Div(
+            dcc.Loading(
+        type="circle",
+        children=html.Div(
                 id='pdmetrics-content',
-            )
+            ))
             ],style=tab_style,selected_style=tab_selected_style),
             # 
             dcc.Tab(label='LGD',children=[
@@ -543,9 +591,11 @@ layout = html.Div(
                     'color': 'black',
                 }
             ),
-            html.Div(
+            dcc.Loading(
+        type="circle",
+        children=html.Div(
                 id='lgdmetrics-content',
-            )],style=tab_style,selected_style=tab_selected_style)
+            ))],style=tab_style,selected_style=tab_selected_style)
         ])
     ])
 
@@ -555,6 +605,7 @@ layout = html.Div(
     Input('pdmodel-dropdown', 'value'),
 )
 def update_pdmetrics(selected_pdmodel):
+    # print(selected_pdmodel)
     if not selected_pdmodel:
         return html.Div(
         )
@@ -568,6 +619,7 @@ def update_pdmetrics(selected_pdmodel):
     feat_importance_src = artifact_obj.get_feat_importances()
 
     model_metrics = helper_obj.get_metrics()
+    
     if not model_metrics:
         return html.Div(
             "Metrics not available for the selected model.",
@@ -627,7 +679,9 @@ def update_pdmetrics(selected_pdmodel):
             })
         ]
     )
-    return metrics_layout
+    return dcc.Loading(
+    type="circle",
+    children=html.Div([metrics_layout]))
 
 
 @dash.callback(
@@ -641,6 +695,8 @@ def update_lgdmetrics(selected_lgdmodel):
         )
     helper_obj2 = helper.Helper(selected_lgdmodel)
     model_metrics = helper_obj2.get_metrics()
+    artifact_obj = get_artifact.DownloadArtifact(helper_obj2)
+    actual_vs_predicted_src = artifact_obj.get_actual_vs_predicted()
     # if not model_metrics:
     #     return html.Div(
     #         "Metrics not available for the selected model.",
@@ -648,13 +704,13 @@ def update_lgdmetrics(selected_lgdmodel):
     metrics_layout = html.Div([
                         html.Div([
                                 html.Div([
-                                    html.H3("AMSE", style=h3_style),
+                                    html.H3("MSE", style=h3_style),
                                     daq.DarkThemeProvider(
                                             theme=theme,
                                             children=html.Div([
                                                 # LED Display
                                                 daq.LEDDisplay(
-                                                    value=round(model_metrics['amse'],3),
+                                                    value=round(model_metrics['mse'],3),
                                                     color=theme['primary'],
                                                     id='darktheme-daq-leddisplay',
                                                     className='dark-theme-control'
@@ -670,6 +726,31 @@ def update_lgdmetrics(selected_lgdmodel):
                             ], style={
                                 "display": "flex",
                                 "justifyContent": "space-between",
-                            })
+                            }),
+                html.Div(
+                [
+                    html.H3("Actual Vs Predicted", style=h3_style),
+                    # plot_actual_vs_predicted(actual_vs_predicted_src,f'/artifacts/actual_vs_predicted/{selected_lgdmodel}.png'),
+                    html.Img(src=plot_actual_vs_predicted(actual_vs_predicted_src,f'assets/actual_vs_predicted_{selected_lgdmodel}.png'),
+                     style={
+                     'width': '90%', 'display': 'block', 'margin': '0 auto',
+                    'backgroundColor': 'white',
+                    'padding': '20px',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 6px 12px rgba(0,0,0,0.1)',
+                    # 'margin': '10px',
+                    'flex': '1',
+                    'textAlign': 'center'})
+                ],
+                style={
+                    "margin": 'auto',
+                    "width": "70%",
+                    'backgroundColor': 'white',
+                    'padding': '20px',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 6px 12px rgba(0,0,0,0.1)',
+                    'textAlign': 'center'})
                         ])
-    return metrics_layout
+    return dcc.Loading(
+    type="circle",
+    children=html.Div([metrics_layout]))

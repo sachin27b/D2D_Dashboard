@@ -1,3 +1,12 @@
+'''
+To do:
+1. load best regression and classification model
+2. pass bachktesting data through them
+3. calculate ead, d2d
+4. show metrics of both model
+5. show airb, firb
+6. show d2d plot and total slipped std'''
+
 import dash
 from dash import Dash, html, dcc
 import plotly.express as px
@@ -188,11 +197,11 @@ def plot_radar(model_metrics):
     return fig
 
 def plot_lgd_radar(model_metrics):
-    metrics = ['RMSE', 'R', 'Adjusted R']
+    metrics = ['RMSE', 'R Square', 'MAE']
     values = [
         round(model_metrics['rmse'], 3),
         round(model_metrics['r2'], 3),
-        round(model_metrics['adjusted_r2'], 3),
+        round(model_metrics['mae'], 3),
     ]
 
     values += [values[0]]
@@ -214,7 +223,6 @@ def plot_lgd_radar(model_metrics):
                 range=[0, 1]
             )
         ),
-        title="Radar Plot of Model Metrics",
         showlegend=False
     )
 
@@ -310,16 +318,83 @@ def plot_roc(path):
     return fig
 
 
-helper_obj = helper.Helper('backtesting')
-artifact_obj = get_artifact.DownloadArtifact(helper_obj)
-conf_src = artifact_obj.get_confusion_matrix()
-model_metrics = helper_obj.get_metrics()
+helper_obj_cl = helper.Helper('backtesting_classifier')
+artifact_obj_cl = get_artifact.DownloadArtifact(helper_obj_cl)
+conf_src_cl = artifact_obj_cl.get_confusion_matrix()
+model_metrics_cl = helper_obj_cl.get_metrics()
+
+helper_obj_reg = helper.Helper('backtesting_regressor')
+artifact_obj_reg = get_artifact.DownloadArtifact(helper_obj_reg)
+# conf_src_reg = artifact_obj_reg.get_confusion_matrix()
+model_metrics_reg = helper_obj_reg.get_metrics()
+
+theme = {
+    'dark': True,
+    'detail': '#007439',
+    'primary': '#00EA64',
+    'secondary': '#6E6E6E',
+}
+
+airb = pd.read_csv("assets/airb_backtesting.csv")
+firb = pd.read_csv("assets/firb_backtesting.csv")
+backtesttab = pd.read_csv("assets/backtesttab.csv")
+
+airb_table = html.Table([
+    html.Thead(
+        html.Tr([html.Th(col, style={'padding': '10px', 'backgroundColor': COLOR_PALETTE['accent_blue'], 'color': 'white'}) for col in airb.columns])
+    ),
+    html.Tbody([
+        html.Tr([
+            html.Td(airb.iloc[row][col], style={'padding': '8px', 'border': '1px solid #ddd','color': 'darkblue'}) 
+            for col in airb.columns
+        ]) for row in range(500)
+    ])
+], style={
+    'width': '100%', 
+    'borderCollapse': 'collapse', 
+    'marginBottom': '20px',
+    'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'
+})
+
+firb_table = html.Table([
+    html.Thead(
+        html.Tr([html.Th(col, style={'padding': '10px', 'backgroundColor': COLOR_PALETTE['accent_blue'], 'color': 'white'}) for col in firb.columns])
+    ),
+    html.Tbody([
+        html.Tr([
+            html.Td(firb.iloc[row][col], style={'padding': '8px', 'border': '1px solid #ddd','color': 'darkblue'}) 
+            for col in firb.columns
+        ]) for row in range(len(firb))
+    ])
+], style={
+    'width': '100%', 
+    'borderCollapse': 'collapse', 
+    'marginBottom': '20px',
+    'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'
+})
+
+backtesttab_table = html.Table([
+    html.Thead(
+        html.Tr([html.Th(col, style={'padding': '10px', 'backgroundColor': COLOR_PALETTE['accent_blue'], 'color': 'white'}) for col in backtesttab.columns])
+    ),
+    html.Tbody([
+        html.Tr([
+            html.Td(backtesttab.iloc[row][col], style={'padding': '8px', 'border': '1px solid #ddd','color': 'darkblue'}) 
+            for col in backtesttab.columns
+        ]) for row in range(len(backtesttab))
+    ])
+], style={
+    'width': '100%', 
+    'borderCollapse': 'collapse', 
+    'marginBottom': '20px',
+    'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'
+})
 
 
 layout = html.Div(
         [
             html.H1(
-                f"Backtesting Results",
+                f"Classifier Backtesting",
                 style=h1_style
             ),
 
@@ -327,13 +402,13 @@ layout = html.Div(
                 html.Div([
                     html.H3("Accuracy", style=h3_style),
                     dcc.Graph(figure=plot_guage(
-                        round(model_metrics['accuracy'], 3)))
+                        round(model_metrics_cl['accuracy'], 3)))
 
                 ], style=box_style),
                 html.Div([
                     html.H3("Key metrics",
                             style=h3_style),
-                    dcc.Graph(figure=plot_radar(model_metrics))
+                    dcc.Graph(figure=plot_radar(model_metrics_cl))
 
                 ], style=box_style),
             ], style={
@@ -343,11 +418,115 @@ layout = html.Div(
             html.Div([
                 html.Div([
                     html.H3("Confusion Matrix", style=h3_style),
-                    dcc.Graph(figure=plot_confusion_matrix(conf_src))
+                    dcc.Graph(figure=plot_confusion_matrix(conf_src_cl))
                 ], style=box_style),
             ], style={
                 "display": "flex",
                 "justifyContent": "space-between",
-            })
-        ]
+            }),
+            
+            html.H1(
+                f"Regressor Backtesting",
+                style=h1_style
+            ),
+
+            html.Div([
+                    html.Div([
+                        html.H3("MSE", style=h3_style),
+                        daq.DarkThemeProvider(
+                                theme=theme,
+                                children=html.Div([
+                                    # LED Display
+                                    daq.LEDDisplay(
+                                        value=round(model_metrics_reg['mse'],3),
+                                        color=theme['primary'],
+                                        id='darktheme-daq-leddisplay',
+                                        className='dark-theme-control'
+                                    )]))
+
+                    ], style=box_style),
+                    html.Div([
+                        html.H3("Key metrics",
+                                style=h3_style),
+                        dcc.Graph(figure=plot_lgd_radar(model_metrics_reg))
+
+                    ], style=box_style),
+                ], style={
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                }),
+            
+            html.Div([
+            html.H3(
+                'A-IRB', 
+                style={
+                    'color': COLOR_PALETTE['primary_mid'],
+                    'textAlign': 'center',
+                    'marginBottom': '15px'
+                }
+            ),
+            airb_table
+        ], style={
+            'maxHeight': '250px',  # Adjust height as needed
+            'overflowY': 'auto',
+            'border': '1px solid #ddd',
+            'marginTop': '30px',
+            'backgroundColor': 'white',
+            'padding': '20px',
+            'borderRadius': '12px',
+            'boxShadow': '0 6px 12px rgba(0,0,0,0.1)'
+        }),
+        html.Div([
+            html.H3(
+                'F-IRB', 
+                style={
+                    'color': COLOR_PALETTE['primary_mid'],
+                    'textAlign': 'center',
+                    'marginBottom': '15px'
+                }
+            ),
+            firb_table
+        ], style={
+            'maxHeight': '250px',  # Adjust height as needed
+            'overflowY': 'auto',
+            'border': '1px solid #ddd',
+            'marginTop': '30px',
+            'backgroundColor': 'white',
+            'padding': '20px',
+            'borderRadius': '12px',
+            'boxShadow': '0 6px 12px rgba(0,0,0,0.1)'
+        }),
+        html.Img(src="/assets/d2d_plot.png",
+                 style={
+                     'width': '90%', 'display': 'block', 'margin': '0 auto',
+                    'backgroundColor': 'white',
+                    'padding': '20px',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 6px 12px rgba(0,0,0,0.1)',
+                    # 'margin': '10px',
+                    'flex': '1',
+                    'textAlign': 'center'
+}),
+        html.Div([
+            html.H3(
+                'Total slipped STD a/c', 
+                style={
+                    'color': COLOR_PALETTE['primary_mid'],
+                    'textAlign': 'center',
+                    'marginBottom': '15px'
+                }
+            ),
+            backtesttab_table
+        ], style={
+            'maxHeight': '250px',  # Adjust height as needed
+            'overflowY': 'auto',
+            'border': '1px solid #ddd',
+            'marginTop': '30px',
+            'backgroundColor': 'white',
+            'padding': '20px',
+            'borderRadius': '12px',
+            'boxShadow': '0 6px 12px rgba(0,0,0,0.1)'
+        })
+
+        ],style=box_style
     )

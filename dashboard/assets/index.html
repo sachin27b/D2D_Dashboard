@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance to Default (D2D) Framework</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1, h2 {
+            color: #343a40;
+        }
+
+        p {
+            color: #495057;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .key-concepts, .methodology, .application {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: "Courier New", Courier, monospace;
+        }
+        .horizontal-line {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, #333, #ccc, #333);
+            width: 20rem;
+            margin: 5px 4rem;
+            
+        }
+        @media (max-width: 600px) {
+    .horizontal-line {
+        width: 80%; 
+        margin: 5px auto; 
+    }
+}
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="section">
+            <h1>Distance to Default (D2D) Framework</h1>
+            <p>The "Distance to Default" (D2D) approach is a framework designed to assess financial risks, particularly for banks and financial institutions. This methodology aims to quantify unexpected losses (UL), compute dynamic provisions, and enhance asset quality monitoring. It integrates statistical models and regulatory guidelines to predict defaults, measure risks, and ensure capital adequacy as per Basel norms.</p>
+        </div>
+
+        <div class="section key-concepts">
+            <h2>Key Concepts</h2>
+            <ul>
+                <li><strong>Probability of Default (PD):</strong> The likelihood of a borrower defaulting within a year, modeled using algorithms like XGBoost, Logistic Regression, Random Forest, and Decision Tree.with a variety of independent variables, such as microeconomic indicators and borrower-specific metrics. </li>
+                <li><strong>Distance to Default (D2D):</strong>A normalized metric derived from the transformed PD. It reflects the proximity of an exposure to potential default on a scale from 0 to 8. Accounts with a lower D2D value are closer to default.</li>
+                <div class="formula">D2D = 4 – z score (transformed PD)</div>
+                <li><strong>Loss Given Default (LGD):</strong> The proportion of exposure expected to be lost if a borrower defaults. LGD is calculated using predicted recovery rates and exposure at default (EAD). </li>
+                <div class="formula">LGD = 1 - Predicted Recovery Rate (RR)</div>
+                 
+    <div class="formula">
+        <span>RR =</span>
+        <span><sup>Actual Amount Recovered - Cost of Recovery</sup></span>
+        <hr class="horizontal-line "/>
+        <span style="margin-left: 10%;">Ideal Recovery Amount</span>
+    </div>
+    <p class="description">
+        This LGD is further used in computation of the Capital Charge (K) and Risk Weighted Asset (RWA). Also, Loss Given Default amount is calculated as:
+    </p>
+    <div class="formula">
+        <span>LGD amount = LGD*EAD. </span>
+    </div>
+                <li><strong>Dynamic Provisioning:</strong>This involves creating specific provisions for exposures based on their risk profiles, helping banks absorb shocks during economic downturns.</li>
+            </ul>
+        </div>
+
+        <div class="section methodology">
+            <h2>Methodology</h2>
+            <ul>
+                <li><strong>Data Modeling:</strong> The models use various ML algorithms like XGBoost, logistic regression, Decision Tree etc. for PD and multiple XGBoost, Decision Tree, linear regression for LGD. Variables include borrower attributes, loan characteristics, and macroeconomic indicators. </li>
+                <li><strong>Normalization:</strong>Transformed PD values are plotted on a normal distribution curve, enabling easier interpretation and comparison.</li>
+                <li><strong>Validation:</strong> Back-testing is performed to ensure model accuracy, typically achieving an 80-85% confidence level in predictions. </li>
+            </ul>
+        </div>
+
+        <div class="section application">
+            <h2>Application and Benefits</h2>
+            <ul>
+                <li><strong>Risk Measurement:</strong> The D2D approach allows banks to compute exposure-specific provisions dynamically, ensuring a buffer against potential defaults.</li>
+                <li><strong>Early Warning Signals (EWS):</strong> By identifying accounts with low D2D values, banks can take proactive measures to mitigate risks. </li>
+              
+                <li><strong>Capital Charge Computation:</strong> Using Advanced Internal Rating-Based (AIRB) methods, the approach calculates the capital required for unexpected losses. </li>
+                                   <div class="formula">
+                        <span>K = LGD * N</span>
+                        <span>&#123; G(PD)/(1 - R)<sup>0.5</sup> + (R)<sup>0.5</sup> * G(0.999) &#125; - LGD * PD</span>
+                    </div>
+                    <p class="description">Where,</p>
+                    <div class="formula">
+                        <span>R = 0.03 * &#123; (1 - e<sup>-35 * PD</sup>)/(1 - e<sup>-35</sup>) &#125; + 0.16 * &#123; (1 - e<sup>-35 * PD</sup>)/(1 - e<sup>-35</sup>) &#125;</span>
+                    </div>
+                
+                    <li><strong>Exposure at Default (EAD)</strong></li>
+                    <p class="description">
+                        EAD = Drawn Amount + CCF * Undrawn Amount
+                    </p>
+                    <p class="description">
+                        Where,
+                    </p>
+                    <ul>
+                        <li>CCF = 0.2; if residual tenure <= 1 year</li>
+                        <li>CCF = 0.5; if residual tenure > 1 year</li>
+                    </ul>
+
+                    <li><strong>Risk Weighted Assets </strong></li>
+                    <div class="formula">
+                        <span>RWA = K × 12.5 × EAD. </span>
+                    </div>
+                
+            </ul>
+        </div>
+
+
+
+        <div class="section">
+            <h2>Illustrative Models</h2>
+            <p><strong>PD Models:</strong> Variables include repayment schedules, borrower age, economic factors, and environmental influences. Models achieve significant predictive power using hierarchical clustering and Principal Component Analysis (PCA) for dimensionality reduction. </p>
+            <p><strong>LGD Models:</strong>These estimate potential losses by analyzing historical recovery patterns, integrating sectoral and geographic factors. </p>
+        </div>
+
+        <div class="section">
+            <h2>Model Applicability</h2>
+            <p>The models are applicable across various sectors, such as retail loans, commercial vehicle loans, and MSME financing. Each case demonstrates model accuracy, variable significance, and the effectiveness of dynamic provisioning. </p>
+        
+        
+        </div>
+    </div>
+</body>
+
+</html>

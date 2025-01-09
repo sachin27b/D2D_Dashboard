@@ -1,48 +1,39 @@
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output, State
-from dash import Dash, html
-import dash_daq as daq
+# import dash
+# from dash import Input, Output, State, dcc, html
+# import dash_bootstrap_components as dbc
+# import time
+# from threading import Thread
+# from dash.long_callback import DiskcacheLongCallbackManager
+# import diskcache
+# dash.register_page(__name__, path='/test')
 
-dash.register_page(__name__, path='/test')
 
+# layout = html.Div([
+#     dcc.Store(id="progress-store", data=0),
+#     dbc.Button("Start Process", id="start-button", n_clicks=0, color="primary"),
+#     html.Br(),
+#     html.Br(),
+#     dbc.Progress(id="progress-bar", striped=True, animated=True, value=0, label="0%"),
+#     html.Div(id="output-container"),
+# ])
 
+# @dash.long_callback(
+#     Output("progress-store", "data"),
+#     Input("start-button", "n_clicks"),
+#     prevent_initial_call=True,
+#     running=[
+#         (Output("start-button", "disabled"), True, False),
+#     ],
+# )
+# def start_long_process(n_clicks, progress=Output("progress-store", "data")):
+#     for i in range(101):
+#         time.sleep(0.1)
+#         progress.send(i)
+#     return 100
 
-theme = {
-    'dark': True,
-    'detail': '#007439',
-    'primary': '#00EA64',
-    'secondary': '#6E6E6E',
-}
-
-layout = html.Div(
-    daq.DarkThemeProvider(
-        theme=theme,
-        children=html.Div([
-            daq.Thermometer(
-                min=0,
-                max=100,
-                value=95.6,
-                id='darktheme-daq-thermometer',
-                className='dark-theme-control'
-            ),
-            html.Div(
-                    "Temperature: 98.6°F",  # Display the value
-                    id='thermometer-value',
-                    style={
-                        'color': theme['primary'],
-                        'textAlign': 'center',
-                        'fontSize': '20px',
-                        'marginTop': '10px'
-                    }
-                )   
-        ], style={
-            'border': 'solid 1px #A2B1C6',
-            'border-radius': '5px',
-            'padding': '20px',
-            'marginTop': '20px',
-            # 'backgroundColor': '#303030',  # Dark background color
-            'color': '#FFFFFF'  # Text color for readability
-        })
-    )
-)
+# @dash.callback(
+#     [Output("progress-bar", "value"), Output("progress-bar", "label")],
+#     Input("progress-store", "data"),
+# )
+# def update_progress_bar(progress):
+#     return progress, f"{progress}%"

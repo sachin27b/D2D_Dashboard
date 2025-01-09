@@ -9,6 +9,10 @@ from components import sidebar_comp
 from components import helper,get_artifact
 from dotenv import load_dotenv
 import os
+import time
+from dash import Dash, DiskcacheManager, Input, Output, html, callback
+import diskcache
+from dash.long_callback import DiskcacheLongCallbackManager
 
 
 def run_dashboard(helper_obj,artifact_obj, app_title='Data Dashboard', debug=True):
@@ -30,7 +34,13 @@ def run_dashboard(helper_obj,artifact_obj, app_title='Data Dashboard', debug=Tru
         'padding': '30px',
         'backgroundColor': COLOR_PALETTE['text_light']
     }
+    # cache = diskcache.Cache("./cache")
+    # # background_callback_manager = DiskcacheManager(cache)
+    # long_callback_manager = DiskcacheLongCallbackManager(cache)
 
+                
+# Initialize the Dash app
+# app = Dash(__name__, )
     # Initialize the Dash app
     app = dash.Dash(__name__, 
         external_stylesheets=[
@@ -60,17 +70,6 @@ def run_dashboard(helper_obj,artifact_obj, app_title='Data Dashboard', debug=Tru
                     'transition': 'text-shadow 0.3s ease-in-out'
                 }
             ),
-            # Add a paragraph with descriptive text
-            # html.P(
-            #     "This dashboard provides insights into your data. Use the navigation links on the sidebar to explore different sections.",
-            #     style={
-            #         'fontFamily': 'Inter, sans-serif',
-            #         'color': COLOR_PALETTE['text_subtle'],
-            #         'textAlign': 'center',
-            #         'marginBottom': '30px',
-            #         'lineHeight': '1.5'
-            #     }
-            # ),
             html.Img(
             src='assets/logo.png',
             style={
@@ -96,23 +95,23 @@ def run_dashboard(helper_obj,artifact_obj, app_title='Data Dashboard', debug=Tru
         'fontFamily': 'Inter, sans-serif'
     })
     
-    @app.callback(
-        Output('sidebar', 'style'),
-        Input('sidebar-toggle-btn', 'n_clicks'),
-        State('sidebar', 'style')
-    )
+    # @app.callback(
+    #     Output('sidebar', 'style'),
+    #     Input('sidebar-toggle-btn', 'n_clicks'),
+    #     State('sidebar', 'style')
+    # )
 
-    def toggle_sidebar(n_clicks, current_style):
-        if current_style is None:
-            current_style = {'transform': 'translateX(0)'}  
+    # def toggle_sidebar(n_clicks, current_style):
+    #     if current_style is None:
+    #         current_style = {'transform': 'translateX(0)'}  
 
-        if n_clicks is None:
-            return current_style
+    #     if n_clicks is None:
+    #         return current_style
 
-        if current_style.get('transform', 'translateX(0)') == 'translateX(0)':
-            return {**current_style, 'transform': 'translateX(-70%)'}
-        else:
-            return {**current_style, 'transform': 'translateX(0)'}
+    #     if current_style.get('transform', 'translateX(0)') == 'translateX(0)':
+    #         return {**current_style, 'transform': 'translateX(-70%)'}
+    #     else:
+    #         return {**current_style, 'transform': 'translateX(0)'}
 
     app.run(debug=debug)
 
