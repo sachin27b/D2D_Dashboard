@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 import os
 import time
 from dash import Dash, DiskcacheManager, Input, Output, html, callback
-import diskcache
-from dash.long_callback import DiskcacheLongCallbackManager
+# import diskcache
+# from dash.long_callback import DiskcacheLongCallbackManager
 
 
 def run_dashboard(helper_obj,artifact_obj, app_title='Data Dashboard', debug=True):

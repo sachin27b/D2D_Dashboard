@@ -1,0 +1,19 @@
+artifact_path: model_XGBRegressor
+databricks_runtime: '16.1'
+flavors:
+  python_function:
+    data: sparkml
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.spark
+    python_version: 3.12.3
+  spark:
+    code: null
+    model_class: pyspark.ml.pipeline.PipelineModel
+    model_data: sparkml
+    pyspark_version: 3.5.2
+mlflow_version: 2.15.1
+model_uuid: e8d02fa3a0ac4273a73965290459a7e5
+run_id: 33d78c6715f641abbcf6efeb52a696bf
+utc_time_created: '2025-01-04 08:39:20.470616'

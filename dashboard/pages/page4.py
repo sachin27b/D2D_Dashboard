@@ -31,7 +31,6 @@ from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
 import json
 import dash_table
-import dash_bootstrap_components as dbc
 import time
 from dash.exceptions import PreventUpdate
 
@@ -439,14 +438,23 @@ def handle_values(n_clicks, *values):
         StandardScaler_columns = [col for col in df.columns if 'scaled' in col]
         mean_encoded_columns = [col for col in df.columns if 'encoding' in col]
 
+
         data_df = spark.createDataFrame(df[StandardScaler_columns+mean_encoded_columns])
+   
         
         final_assembler = VectorAssembler(inputCols=StandardScaler_columns+mean_encoded_columns, outputCol="features")
         what_if_data = final_assembler.transform(data_df)
+    
         classifier_pred = classifier.transform(what_if_data)
-        
+    
         regressor_pred = regressor.transform(what_if_data)
-        
+
+        # print(classifier_pred.show())
+        # print(regressor_pred)
+        # classifier_pred.show()
+        # regressor_pred.show()
+
+
         classifier_pred = classifier_pred.toPandas()
         regressor_pred = regressor_pred.toPandas()
         
